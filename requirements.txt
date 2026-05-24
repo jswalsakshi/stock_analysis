@@ -1,12 +1,10 @@
 yfinance>=0.2.40
-pandas-ta>=0.3.14b
 pandas>=2.0
 numpy>=1.24
 beautifulsoup4>=4.12
 requests>=2.31
 gnews>=0.3.6
 nltk>=3.8
-scipy>=1.11
 streamlit>=1.32
 plotly>=5.20
 python-dotenv>=1.0

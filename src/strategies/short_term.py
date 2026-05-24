@@ -1,5 +1,4 @@
 import pandas as pd
-import pandas_ta as ta
 
 from src.data.prices import get_price_data
 from src.data.news import get_news_sentiment
