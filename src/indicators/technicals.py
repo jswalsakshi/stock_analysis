@@ -219,3 +219,65 @@ def get_ema_slope(df, length=200, lookback=20):
         return 0.0
     slope = (ema.iloc[-1] - ema.iloc[-lookback]) / lookback
     return float(slope)
+
+
+def _sma(series, length):
+    """Simple Moving Average."""
+    return series.rolling(window=length).mean()
+
+
+def get_sma(df, length=50):
+    """Return SMA of Close prices."""
+    return _sma(df["Close"], length=length)
+
+
+def get_rsi_value(df, length=14):
+    """Return the latest RSI value."""
+    rsi = _rsi(df["Close"], length=length)
+    if rsi is None or len(rsi) == 0:
+        return None
+    return float(rsi.iloc[-1])
+
+
+def check_sma50_support(df, tolerance_pct=1.5, min_candles=2, max_candles=5):
+    """
+    Check if stock is taking support on SMA50 or consolidating near it.
+
+    Support: Low touches or comes within tolerance_pct of SMA50.
+    Consolidation: Close stays within tolerance_pct of SMA50 for min_candles to max_candles.
+
+    Returns True if either condition is met in the recent candles.
+    """
+    if len(df) < 55:
+        return False
+
+    sma50 = _sma(df["Close"], 50)
+    if sma50 is None or sma50.isna().all():
+        return False
+
+    # Check last max_candles bars
+    recent = df.iloc[-max_candles:]
+    recent_sma = sma50.iloc[-max_candles:]
+
+    # Support check: Low within tolerance of SMA50 AND close above SMA50
+    support_count = 0
+    consolidation_count = 0
+
+    for i in range(len(recent)):
+        sma_val = recent_sma.iloc[i]
+        if pd.isna(sma_val) or sma_val == 0:
+            continue
+
+        low = recent["Low"].iloc[i]
+        close = recent["Close"].iloc[i]
+        tolerance = sma_val * (tolerance_pct / 100)
+
+        # Support: low touches SMA50 (within tolerance) and close is above
+        if abs(low - sma_val) <= tolerance and close >= sma_val:
+            support_count += 1
+
+        # Consolidation: close is near SMA50 (within tolerance)
+        if abs(close - sma_val) <= tolerance:
+            consolidation_count += 1
+
+    return support_count >= min_candles or consolidation_count >= min_candles

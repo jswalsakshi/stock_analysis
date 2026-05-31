@@ -69,3 +69,31 @@ def get_index_data(index="^NSEI", period="1y"):
         return df
     except Exception:
         return pd.DataFrame()
+
+
+def get_weekly_data(symbol, period="1y"):
+    """Get weekly OHLCV data for a symbol."""
+    ticker = f"{symbol}.NS"
+    try:
+        df = yf.download(ticker, period=period, interval="1wk", auto_adjust=True, progress=False)
+        if df.empty:
+            return pd.DataFrame()
+        if isinstance(df.columns, pd.MultiIndex):
+            df.columns = df.columns.get_level_values(0)
+        return df
+    except Exception:
+        return pd.DataFrame()
+
+
+def get_monthly_data(symbol, period="1y"):
+    """Get monthly OHLCV data for a symbol."""
+    ticker = f"{symbol}.NS"
+    try:
+        df = yf.download(ticker, period=period, interval="1mo", auto_adjust=True, progress=False)
+        if df.empty:
+            return pd.DataFrame()
+        if isinstance(df.columns, pd.MultiIndex):
+            df.columns = df.columns.get_level_values(0)
+        return df
+    except Exception:
+        return pd.DataFrame()
